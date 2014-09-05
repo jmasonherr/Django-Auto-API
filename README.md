@@ -19,7 +19,10 @@ INSTALLED_APPS = [
 
 ]
 ```
-- Add necessary settings to 
+
+- Add necessary settings
+
+
 ```
 # settings.py
 API_REQUEST_LIMIT = 200 # Maximum items returned ever
@@ -34,6 +37,15 @@ EXCLUDE_MODELS = ['Site', 'Permission', ...] # Do not allow these models access 
 XS_SHARING_ALLOWED_ORIGINS =  ['*' , 'http://localhost:8001', 'http://mysite.com', 'http://localhost:12080']
 XS_SHARING_ALLOWED_METHODS = ['POST','GET','OPTIONS', 'PUT', 'DELETE']
 ```
+
+- Mixin the UpdateableMixin for any models you want to see.
+
+``` 
+class Foo(models.Model, UpdateableMixin):
+  name = models.CharField(max_length=500)
+```
+
+
 
 
 
