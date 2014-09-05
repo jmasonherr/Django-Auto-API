@@ -1,0 +1,11 @@
+{% extends "x_base.html" %}
+{% block body %}
+<h1>API HOME</h1>
+{% for modelname in routes %}
+<a href="/{{ api_prefix }}/{{ modelname }}/">
+    <h3>{{modelname}}</h3>
+</a>
+{% endfor %}
+
+
+{% endblock %}
