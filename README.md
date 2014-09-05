@@ -8,6 +8,11 @@ https://github.com/jmasonherr/Django-AppEngine-Conversion
 
 ### Features:
 - Easy
+- Built in filter/sort like Django ORM
+- Automatic type conversions and serialization/deserialization
+- Custom endpoints
+- DATA attribute added to request object for easy retrieval of data from different request types
+- Relationships automatically nested in API
 - Login / CORS Support
 - Only JSON
 - Fat model design
@@ -16,6 +21,7 @@ https://github.com/jmasonherr/Django-AppEngine-Conversion
 - Easy custom endpoints
 - Conversion of datatypes
 - Allows partial and incomplete data in update/create
+- Works on AppEngine
 - Integrates seamlessly with MicroRelate.js and Backbone.js.  Allows auto-copying and integration of models and collections to front-end apis
 
 ### Installation
@@ -30,6 +36,16 @@ INSTALLED_APPS = [
   ...
 
 ]
+```
+
+- Include url in urls.py
+
+```
+...
+    # API
+    url(r'^' + settings.URL_PREFIX + r'/', include('auto_api.urls')),
+...
+
 ```
 
 - Add necessary settings
@@ -93,13 +109,51 @@ class Foo(models.Model, UpdateableMixin):
   @classmethod
   def has_POST_create_permission(cls, request):
     """ Customize access POST for creation purposes"""
-    return request.user.is_superuser
-
-
-
+    return request.user.is_superuser # Only allow object creation if is superuser
 
 ```
 
+That's it!  Foo is now available for GET, POST, PUT, and DELETE
+
+Relationships are available via their ORM names
+
+### Part 2: Filtering, pagination and sorting
+
+AutoApi allows filtering and sorting like the Django ORM
+/api/foo/?sort=-name&other_model_id__gte=5
+returns all of the Foo objects that are related to OtherModels with an id greater than 5
+For simple equality, use __eq at the end of your filter
+/api/foo/?name__eq=gonzo
+returns a list of all Foo objects named gonzo
+
+Sorting is available via 'sort', pagination via 'page'
+
+The catch: Filtering on complex datatypes like dates and booleans are only available on the immediate model.  Filtering by date will not work across relationships.
+
+
+
+### Part 3: Custom endpoints
+
+Forward and reverse relationships are already included. (/api/foo/1/other_model/ ) will return all of the related OtherModel instances if you have the permission to see them
+
+If you want to return custom data, just add a method to the model like so:
+
+```
+
+class Foo(models.Model, UpdateableMixin):
+  ...
+  
+  def GET_active_other_models(self, request):
+    """ You can return a JSON-ready dictionary or a Query object from these methods """
+    return self.other_models.filter(active=True)
+    # Equivalent to /api/foo/1/other_models/?active__eq=True
+
+  def POST_change_secret_key(self, request):
+    if request.user.is_superuser:
+      self.secret_key = request.DATA.get('secret_key')
+      self.save()
+      return self.toJSON()
+```
 
 
 
