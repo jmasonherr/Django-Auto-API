@@ -120,10 +120,15 @@ Relationships are available via their ORM names
 ### Part 2: Filtering, pagination and sorting
 
 AutoApi allows filtering and sorting like the Django ORM
+
 /api/foo/?sort=-name&other_model_id__gte=5
+
 returns all of the Foo objects that are related to OtherModels with an id greater than 5
+
 For simple equality, use __eq at the end of your filter
+
 /api/foo/?name__eq=gonzo
+
 returns a list of all Foo objects named gonzo
 
 Sorting is available via 'sort', pagination via 'page'
@@ -143,18 +148,23 @@ If you want to return custom data, just add a method to the model like so:
 class Foo(models.Model, UpdateableMixin):
   ...
   
-  def GET_active_other_models(self, request):
+  # GET /foo/1/active_other_models/
+  def GET_active_other_models(self, request): # Limited to GET requests
     """ You can return a JSON-ready dictionary or a Query object from these methods """
     return self.other_models.filter(active=True)
     # Equivalent to /api/foo/1/other_models/?active__eq=True
 
-  def POST_change_secret_key(self, request):
+  # POST /foo/1/change_secret_key/?secret_key=asdf
+  def POST_change_secret_key(self, request): # Limited to POST requests
     if request.user.is_superuser:
       self.secret_key = request.DATA.get('secret_key')
       self.save()
       return self.toJSON()
 ```
 
+the format for custom endpoints is :
+def METHOD_method_name(self, request):
+  pass
 
 
-
+#### There are still tons of undocumented features, more coming soon!
